@@ -15,7 +15,6 @@ public class SocketClient1 {
             bufferedWriter.write(bufferedReader.readLine());
             bufferedWriter.write("\n");
             bufferedWriter.flush();
-
         }
 
     }

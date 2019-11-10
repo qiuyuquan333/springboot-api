@@ -1,9 +1,10 @@
-package com.qyq.springbootapi.util;
+package com.qyq.springbootapi.util.encrypt;
 
 import org.apache.tomcat.util.codec.binary.Base64;
 
 import javax.crypto.Cipher;
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -27,18 +28,18 @@ public class RsaUtil {
      */
     private static final int KEY_BIT = 1024;
 
-    /** *//**
+    /**
      * RSA最大加密明文大小
      */
     private static final int MAX_ENCRYPT_BLOCK = 117;
 
-    /** *//**
+    /**
      * RSA最大解密密文大小
      * 1024位的密钥要改成128,2048位的才是256
      */
     private static final int MAX_DECRYPT_BLOCK = 256;
 
-    /** *//**
+    /**
      * 签名算法
      */
     public static final String SIGNATURE_ALGORITHM = "MD5withRSA";
@@ -77,79 +78,52 @@ public class RsaUtil {
      * @param map
      * @return
      */
-    public static String getPrivate(Map<String,Object> map){
+    public static String getPrivateKey(Map<String,Object> map){
         Key key = (Key) map.get("privateKey");
         String privateKey = Base64.encodeBase64String(key.getEncoded());
         return privateKey;
     }
 
     /**
-     * 公钥分段加密 --》公钥加密
+     * 公钥、私钥分段加密 --》公钥、私钥加密
      * @param data
-     * @param publicKey
+     * @param key
+     * @param isPublic 是否为公钥
      * @return
      * @throws Exception
      */
-    public static String encrypt(String data, String publicKey) throws Exception {
-        PublicKey publicK = StringToPublicKey(publicKey);
-
+    public static String encrypt(byte[] data, String key, boolean isPublic) throws Exception {
         Cipher cipher = Cipher.getInstance(KEY_ALGORITHM);
-        cipher.init(Cipher.ENCRYPT_MODE, publicK);
-        int inputLen = data.getBytes("UTF-8").length;
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        int offset = 0;
-        byte[] cache;
-        int i = 0;
-        // 对数据分段加密
-        while (inputLen - offset > 0) {
-            if (inputLen - offset > MAX_ENCRYPT_BLOCK) {
-                cache = cipher.doFinal(data.getBytes("UTF-8"), offset, MAX_ENCRYPT_BLOCK);
-            } else {
-                cache = cipher.doFinal(data.getBytes("UTF-8"), offset, inputLen - offset);
-            }
-            out.write(cache, 0, cache.length);
-            i++;
-            offset = i * MAX_ENCRYPT_BLOCK;
+        if(isPublic){
+            PublicKey publicK = StringToPublicKey(key);
+            cipher.init(Cipher.ENCRYPT_MODE, publicK);
+        }else {
+            PrivateKey privateK = StringToPrivateKey(key);
+            cipher.init(Cipher.ENCRYPT_MODE, privateK);
         }
-        byte[] encryptedData = out.toByteArray();
-        out.close();
-        // 获取加密内容使用base64进行编码,并以UTF-8为标准转化成字符串
-        // 加密后的字符串
-        return Base64.encodeBase64String(encryptedData);
+        int inputLen = data.length;
+        return Segment(inputLen,cipher,data,MAX_ENCRYPT_BLOCK,true);
     }
 
     /**
-     * 私钥分段解密 --》私钥解密
+     * 公钥、私钥分段解密 --》公钥、私钥解密
      * @param data
-     * @param privateKey
+     * @param key
+     * @param isPublic 是否为公钥
      * @return
      * @throws Exception
      */
-    public static String decrypt(String data, String privateKey) throws Exception {
-        PrivateKey privateK = StringToPrivateKey(privateKey);
+    public static String decrypt(byte[] data, String key, boolean isPublic) throws Exception {
         Cipher cipher = Cipher.getInstance(KEY_ALGORITHM);
-        cipher.init(Cipher.DECRYPT_MODE, privateK);
-        byte[] dataBytes = Base64.decodeBase64(data);//对要解密的数据进行解码
-        int inputLen = dataBytes.length;
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        int offset = 0;
-        byte[] cache;
-        int i = 0;
-        // 对数据分段解密
-        while (inputLen - offset > 0) {
-            if (inputLen - offset > MAX_DECRYPT_BLOCK) {
-                cache = cipher.doFinal(dataBytes, offset, MAX_DECRYPT_BLOCK);
-            } else {
-                cache = cipher.doFinal(dataBytes, offset, inputLen - offset);
-            }
-            out.write(cache, 0, cache.length);
-            i++;
-            offset = i * MAX_DECRYPT_BLOCK;
+        if(isPublic){
+            PublicKey publicK = StringToPublicKey(key);
+            cipher.init(Cipher.DECRYPT_MODE, publicK);
+        }else{
+            PrivateKey privateK = StringToPrivateKey(key);
+            cipher.init(Cipher.DECRYPT_MODE, privateK);
         }
-        byte[] decryptedData = out.toByteArray();
-        out.close();
-        // 解密后的内容
-        return new String(decryptedData, "UTF-8");
+        int inputLen = data.length;
+        return Segment(inputLen,cipher,data,MAX_DECRYPT_BLOCK,false);
     }
 
     /**
@@ -163,7 +137,7 @@ public class RsaUtil {
         PrivateKey privateK = StringToPrivateKey(privateKey);
         Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
         signature.initSign(privateK);
-        signature.update(data.getBytes("UTF-8"));
+        signature.update(data.getBytes());
         return Base64.encodeBase64String(signature.sign());
     }
 
@@ -179,7 +153,7 @@ public class RsaUtil {
         PublicKey publicK = StringToPublicKey(publicKey);
         Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
         signature.initVerify(publicK);
-        signature.update(data.getBytes("UTF-8"));
+        signature.update(data.getBytes());
         return signature.verify(Base64.decodeBase64(sign));
     }
 
@@ -189,7 +163,7 @@ public class RsaUtil {
      * @return
      * @throws Exception
      */
-    public static PublicKey StringToPublicKey(String publicKey)throws Exception{
+    private static PublicKey StringToPublicKey(String publicKey)throws Exception{
         byte[] bytes = Base64.decodeBase64(publicKey);//先把公钥进行解码
         X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(bytes);
         KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
@@ -203,12 +177,49 @@ public class RsaUtil {
      * @return
      * @throws Exception
      */
-    public static PrivateKey StringToPrivateKey(String privateKey)throws Exception{
+    private static PrivateKey StringToPrivateKey(String privateKey)throws Exception{
         byte[] bytes = Base64.decodeBase64(privateKey);//先对私钥进行解码
         PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(bytes);
         KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
         PrivateKey privateK = keyFactory.generatePrivate(pkcs8EncodedKeySpec);
-        return  privateK;
+        return privateK;
+    }
+
+    /**
+     * 分段加、解密
+     * @param inputLen 字节长度
+     * @param cipher 加密实例类
+     * @param data 数据
+     * @param MAX_BLOCK 指定加解密最大明文大小
+     * @param isEncrypt 是否为加密
+     * @return
+     * @throws Exception
+     */
+    private static String Segment(Integer inputLen,Cipher cipher,byte[] data,Integer MAX_BLOCK, boolean isEncrypt)throws Exception{
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        int offset = 0;
+        byte[] cache;
+        int i = 0;
+        // 对数据分段加密
+        while (inputLen - offset > 0) {
+            if (inputLen - offset > MAX_BLOCK) {
+                cache = cipher.doFinal(data, offset, MAX_BLOCK);
+            } else {
+                cache = cipher.doFinal(data, offset, inputLen - offset);
+            }
+            out.write(cache, 0, cache.length);
+            i++;
+            offset = i * MAX_BLOCK;
+        }
+        byte[] encryptedData = out.toByteArray();
+        out.close();
+        if(isEncrypt){
+            //如果为加密，进行编码
+            return Base64.encodeBase64String(encryptedData);
+        }else {
+            //解密则为解码
+            return new String(encryptedData, StandardCharsets.UTF_8);
+        }
     }
 
 }

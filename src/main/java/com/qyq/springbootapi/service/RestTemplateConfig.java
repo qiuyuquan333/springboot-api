@@ -26,10 +26,17 @@ public class RestTemplateConfig {
 //        return factory;
 //    }
 
-    //使用builder来构建
+//    使用builder来构建
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder){
         return builder.build();
     }
+
+//    @Bean
+//    public RestTemplate restTemplate(){
+//        RestTemplate restTemplate = new RestTemplate();
+//        restTemplate.getMessageConverters().set(1, new StringHttpMessageConverter(StandardCharsets.UTF_8));
+//        return restTemplate;
+//    }
 
 }

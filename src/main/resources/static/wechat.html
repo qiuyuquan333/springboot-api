@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form>
+    <div align="center"><img src="" id="image" name="image" style="width: 150px;height: 150px"></div>
+    <div align="center" style=""><input type="button" id="button" value="获取验证码" name="获取验证码" ></div>
+    <div align="center"></div>
+    <div align="center"><img src="login.jpg" id="image1" name="image" style="width: 150px;height: 150px"></div>
+    <div align="center" style=""><input type="button" id="button1" value="获取验证码" name="获取验证码" ></div>
+</form>
+</body>
+</html>
+<script src="jquery-3.3.1.min.js"></script>
+<script>
+    $("#button").click(function () {
+        $.get("/wechat/getQRcode",function (result) {
+            $("#image").attr("src","data:image/jpg;base64,"+result);
+        })
+    })
+
+    // $("#button1").click(function () {
+    //     $.get("/wechat/authori",function (result) {
+    //         $("#image1").attr("src",result);
+    //     })
+    // })
+</script>

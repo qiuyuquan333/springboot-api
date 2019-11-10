@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qyq.springbootapi.mapper.UserInfoMapper" >
+
+    <insert id="insertUserInfo" parameterType="com.qyq.springbootapi.result.wechat.UserInfoResult">
+        insert into user_info (openid,nickname,sex,province,city,country,headimgurl,privilege,unionid)
+        values (#{openid},#{nickname},#{sex},#{province},#{city},#{country},#{headimgurl},#{privilege},#{unionid})
+    </insert>
+</mapper>

@@ -5,7 +5,7 @@ spring:
       driver-class-name: com.mysql.cj.jdbc.Driver
       url: jdbc:mysql://localhost:3306/datatest?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8&useSSL=false
       username: root
-      password: 123456
+      password: root
 
 ##  mybatis  ##
 mybatis:
@@ -19,3 +19,5 @@ RSA:
   privateKey: MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAMcJilCfGtsoXe/ioAqT2sh36bz2j+KmUUcaKaF+dQNQ/LKTZNyftazl44Oyl6gEGfSYkFgGiCMutv6EMHlPRV6AYL8VNo8BmcDGDfWWyL3fDIpxtD99IXLV7k0f7Hm4doEuaEEb9pY3+wpAYe2Fr41MLRv4kI9nG7/OH24/cTHdAgMBAAECgYATKFPr1qSbG5OPF10YJ4sTaJdS3NiUlDWWhmojZSyWGSF5fr5ijezKq4Xuky4NufdVl6mtD1PjLwfmD4sq4fpnJqfAuUMUGe3NC9Y6hm3VqWdXqY9UrRaQQUUsPlQlxaMYCOwjPdgvk3BRkIet1vY/63EWjrFfXXqhb+GpgKz68QJBAO4/FZI7E9lK8BMRodrT44rB1W0hV/nan0Lel2ZSoZf0QhChCtQLP6WJ3rfC1IQHmL9ZWVqD1fzndXEHyAJcUmcCQQDV3ns0lVFll76dGZ0VEB8G+vVD7L8TIpJSuCaRKf4KZXIWoOUIoefgNEEW8AGF9EwkPlUNFrSXahEeyvjFgNcbAkAvqKLyC6tezmTUC7TrB3P/L+M333Gv45H0WH7E00bMFOqaVPzLiiyDOt84t1q3xqVBsefz+Wd3Hf4aTEowXrOFAkBrPi/r00BIwEnd/z0MldPpLSiV0f6SetCC2ELGohb4YZxPCokuxfk/LRTCisFIyZLwzazabltKXe6N0VvjtdKnAkEAxxToDiKLandMMcAZjpeQS57ENSq17DVA7v3ZCl5W9wIIi7zGwcfUFZ/Uwwk55+Hrx/DmBqxQjhGanPzp9XWMVw==
 
 
+AES:
+  key: mGU9lbuwt9fh/7dek3iDlQ==

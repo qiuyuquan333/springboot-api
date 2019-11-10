@@ -1,10 +1,9 @@
 package com.qyq.springbootapi.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.Cookie;
@@ -12,10 +11,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 import java.util.UUID;
 
 @Controller
 public class UserController {
+
+    final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @RequestMapping("/coo")
     public String CooController(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -35,12 +37,6 @@ public class UserController {
         }
         return request.getMethod();
 
-    }
-
-
-    @RequestMapping("/file")
-    public String fileController(){
-        return "index.html";
     }
 
     @PostMapping("/fileUpload")
@@ -65,5 +61,36 @@ public class UserController {
     }
 
 
+    @RequestMapping("/logger/{name}/{sex}")
+    @ResponseBody
+    public String loggerController(@PathVariable String name,@PathVariable String sex){
+        logger.info(logger.getName());
+        logger.info("进入方法：参数为 [{}]，[{}]",name,sex);
+        name = "yxy";
+        sex = "女";
+        logger.info("重设后的值：[{}]，[{}]",name,sex);
+        return sex+name;
+    }
+
+//    @ResponseBody
+    @RequestMapping(value = "/servlet",method = RequestMethod.POST)
+    public void servletTest(HttpServletRequest request,HttpServletResponse response){
+        logger.info("请求URL：{}，请求方式：{}",request.getRequestURL(),request.getContentType());
+        String name = request.getParameter("name");
+        String age = request.getParameter("age");
+        response.setContentType("application/json;charset=utf-8");
+        try {
+            response.getWriter().write(name+" : "+age);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @ResponseBody
+    @PostMapping("/jsonTest")
+    public String jsonTest(@RequestBody Map map){
+        logger.info("接收到的数据：param1：【{}】,param2：【{}】",map.get("productsList"),map.get("numberList"));
+        return "true";
+    }
 
 }

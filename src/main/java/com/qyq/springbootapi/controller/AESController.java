@@ -2,8 +2,9 @@ package com.qyq.springbootapi.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.qyq.springbootapi.result.ResponseResult;
-import com.qyq.springbootapi.util.AesUtil;
-import com.qyq.springbootapi.util.RsaUtil;
+import com.qyq.springbootapi.util.encrypt.AesUtil;
+import com.qyq.springbootapi.util.encrypt.RsaUtil;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,7 +40,7 @@ public class AESController {
             System.out.println("接收到的加密AES密钥："+des_key);
             System.out.println("接收到的加密数据："+r_data);
             //先用RSA私钥解密得到AES密钥
-            String decrypt = RsaUtil.decrypt(des_key, privateKey);
+            String decrypt = RsaUtil.decrypt(Base64.decodeBase64(des_key), privateKey ,false);
             System.out.println("解密后得到的AES密钥："+decrypt);
             //再使用AES密钥解密数据
             String s = AesUtil.decrypt(r_data, decrypt);
@@ -60,10 +61,10 @@ public class AESController {
     public ResponseResult TestApiController1(String content){
         try {
             //生成AES随机密钥
-            String generateKey = AesUtil.getGenerateKey();
+            String generateKey = AesUtil.getGenerateKeyString();
             System.out.println("生成AES随机密钥："+generateKey);
             //使用RSA加密AES密钥
-            String desKey = RsaUtil.encrypt(generateKey, publicKey);
+            String desKey = RsaUtil.encrypt(generateKey.getBytes(), publicKey,true);
             System.out.println("公钥加密AES密钥："+desKey);
             //AES加密数据
             String data = AesUtil.encrypt(content, generateKey);

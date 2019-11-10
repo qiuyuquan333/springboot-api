@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <form>
+        <table align="center">
+            <tr>
+                <td><label>申请码：</label></td>
+                <td><textarea id="application-code" rows="10" cols="30"></textarea></td>
+            </tr>
+            <tr>
+                <td><label>授权时间：</label></td>
+                <td><input id="time" type="text" size="5"><label>天</label></td>
+            </tr>
+            <tr>
+                <td><input id="author" type="button" value="授权" style="color: blue" onclick="authorButton()"></td>
+            </tr>
+            <tr>
+                <td><label>授权码为：</label></td>
+                <td><textarea id="author-code" rows="10" cols="30"></textarea></td>
+            </tr>
+        </table>
+    </form>
+<script src="jquery-3.3.1.min.js"></script>
+<script>
+    function authorButton() {
+        var code = $("#application-code").val();
+        var time = $("#time").val();
+        window.
+        $.get("/register?code="+code+"&time="+time,function (result) {
+            $("#author-code").val(result);
+        })
+
+    }
+</script>
+</body>
+</html>
